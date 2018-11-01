@@ -1,8 +1,7 @@
 import puppeteer from "puppeteer";
-import moment from 'moment';
+import moment from "moment";
 
-
-export const dateFormat = 'MM/D/YYYY h:mm:ss a'
+export const dateFormat = "MM/D/YYYY h:mm:ss a";
 
 export class AutomaticRegister {
   constructor() {
@@ -15,7 +14,10 @@ export class AutomaticRegister {
 
     this.login();
     this.chooseDate();
+    this.choosePartner();
+    this.submitRegistration();
   }
+
   async login() {
     await this.page.goto("http://www.seattlebadmintonclub.com/Security.aspx");
 
@@ -52,20 +54,38 @@ export class AutomaticRegister {
     console.log("Available play dates:");
     console.log(JSON.stringify(dateOptions, null, " "));
 
-    const nextTuesOpt = dateOptions.find(value => this.isNextTuesday(value.text));
-    console.log(`Selecting ${JSON.stringify(nextTuesOpt)}`)
+    const nextTuesOpt = dateOptions.find(value =>
+      this.isNextTuesday(value.text)
+    );
+    console.log(`Selecting ${JSON.stringify(nextTuesOpt)}`);
 
-    await this.page.select("#ctl00_bodyContentPlaceHolder_ddlistPlayDate", nextTuesOpt.value);
+    await this.page.select(
+      "#ctl00_bodyContentPlaceHolder_ddlistPlayDate",
+      nextTuesOpt.value
+    );
     await this.page.waitForResponse(
       "http://www.seattlebadmintonclub.com/Register2.aspx"
     );
+  }
 
-    // await this.page.select("#ctl00_bodyContentPlaceHolder_ddlistPlayDate", "343");
-    // await this.page.waitForResponse("http://www.seattlebadmintonclub.com/Register2.aspx");
+  async choosePartner() {
+    console.log("choosing partner");
+    await this.page.select(
+      "#ctl00_bodyContentPlaceHolder_listUnselected",
+      "tom nguyen 141"
+    );
+    await this.page.waitForResponse(
+      "http://www.seattlebadmintonclub.com/Register2.aspx"
+    );
+  }
 
-    // await this.page.select("#ctl00_bodyContentPlaceHolder_listUnselected", 'tom nguyen 141');
-    // await this.page.waitForResponse("http://www.seattlebadmintonclub.com/Register2.aspx");
-    // console.log("response: " + JSON.stringify(response, null, " "));
+  async submitRegistration() {
+    console.log("Clicking the register button");
+    const registerButtonSelector = "#ctl00_bodyContentPlaceHolder_registerTB";
+    await this.page.click(registerButtonSelector);
+    await this.page.waitForResponse(
+      "http://www.seattlebadmintonclub.com/Register2.aspx"
+    );
 
     await this.page.screenshot({ path: "example.png" });
     await this.browser.close();
@@ -75,6 +95,10 @@ export class AutomaticRegister {
     const today = moment();
     const optDate = moment(dateStr, dateFormat);
 
-    return optDate.day() === 2 && optDate.diff(today, "day") > 0 && optDate.hour() === 20;
+    return (
+      optDate.day() === 2 &&
+      optDate.diff(today, "day") > 0 &&
+      optDate.hour() === 20
+    );
   }
 }
