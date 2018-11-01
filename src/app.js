@@ -44,23 +44,21 @@ export class AutomaticRegister {
 
   async chooseDate() {
     const playDateSelector = "#ctl00_bodyContentPlaceHolder_ddlistPlayDate";
-    await this.page.waitForSelector(loginButtonSelector);
+    await this.page.waitForSelector(playDateSelector);
     const playDateSelectElem = await this.page.$(playDateSelector);
     const dateOptions = await playDateSelectElem.$$eval("*", nodes =>
       nodes.map(n => ({ text: n.innerText, value: n.value }))
     );
+    console.log("Available play dates:");
+    console.log(JSON.stringify(dateOptions, null, " "));
 
-    console.log("Available play dates:")
-    console.log(JSON.stringify(dateOptions, null, ' '));
+    const nextTuesOpt = dateOptions.find(value => this.isNextTuesday(value.text));
+    console.log(`Selecting ${JSON.stringify(nextTuesOpt)}`)
 
-    // const validDate = dateOptions.find((opt) => this.isNextTuesday(opt.label))
-
-    // console.log('validDate: ' + validDate);
-
-    // await this.page.select("#ctl00_bodyContentPlaceHolder_ddlistPlayDate", "343");
-    // await this.page.waitForResponse(
-    //   "http://www.seattlebadmintonclub.com/Register2.aspx"
-    // );
+    await this.page.select("#ctl00_bodyContentPlaceHolder_ddlistPlayDate", nextTuesOpt.value);
+    await this.page.waitForResponse(
+      "http://www.seattlebadmintonclub.com/Register2.aspx"
+    );
 
     // await this.page.select("#ctl00_bodyContentPlaceHolder_ddlistPlayDate", "343");
     // await this.page.waitForResponse("http://www.seattlebadmintonclub.com/Register2.aspx");

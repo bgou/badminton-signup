@@ -22,8 +22,6 @@ module.exports = {
 				loader: 'babel-loader',
 
 				options: {
-					plugins: ['syntax-dynamic-import'],
-
 					presets: [
 						[
 							'env',
