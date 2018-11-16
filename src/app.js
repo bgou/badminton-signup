@@ -3,6 +3,7 @@ import moment from "moment";
 
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
+const tom = 'tom nguyen 141'
 
 export class AutomaticRegister {
   constructor() {
@@ -16,7 +17,7 @@ export class AutomaticRegister {
     try {
       await this.login();
       await this.chooseDate();
-      await this.choosePartner();
+      await this.choosePartner(tom);
       await this.submitRegistration();
     } catch (ex) {
       console.error(ex);
@@ -78,15 +79,22 @@ export class AutomaticRegister {
     console.log(`Selected ${nextTuesOpt.text}`)
   }
 
-  async choosePartner() {
-    console.log("Choosing partner");
+  async choosePartner(partner) {
+    if (!partner) {
+      console.log('No partner specified, registering self.');
+      return;
+    }
+    
+    console.log(`Choosing ${partner} as partner`);
     await this.page.select(
       "#ctl00_bodyContentPlaceHolder_listUnselected",
-      "tom nguyen 141"
+      partner
     );
     await this.page.waitForResponse(
       register2Url
     );
+
+    console.log(`Selected ${partner} as partner`)
   }
 
   async submitRegistration() {
