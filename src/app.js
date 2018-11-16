@@ -1,15 +1,22 @@
 import puppeteer from "puppeteer";
 import moment from "moment";
+import getLogger from "./logger";
+import { worker } from "cluster";
 
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
 const tom = "tom nguyen 141";
 
+let logger = {};
 export class AutomaticRegister {
-  constructor() {
+  constructor(index) {
     this.browser = {};
     this.page = {};
+    this.index = index;
+    this.finished = false;
+    logger = getLogger(`Worker ${index}`);
   }
+
   async register() {
     this.browser = await puppeteer.launch();
     this.page = await this.browser.newPage();
@@ -22,10 +29,11 @@ export class AutomaticRegister {
     } catch (ex) {
       console.error(ex);
     }
+    this.finished = true;
   }
 
   async login() {
-    console.log("Opening login page");
+    logger.info("Opening login page");
     await this.page.goto("http://www.seattlebadmintonclub.com/Security.aspx");
 
     const leagueSelector =
@@ -38,7 +46,7 @@ export class AutomaticRegister {
     await this.page.click(loginButtonSelector);
     await this.page.waitForNavigation();
 
-    console.log("Entering crendentials");
+    logger.info("Entering crendentials");
     await this.page.type(
       "#ctl00_bodyContentPlaceHolder_Login1_UserName",
       "geekhuh"
@@ -48,58 +56,58 @@ export class AutomaticRegister {
       "$badminton"
     );
 
-    console.log("Logging in");
+    logger.info("Logging in");
     await this.page.click("#ctl00_bodyContentPlaceHolder_Login1_LoginButton");
     await this.page.waitForNavigation();
   }
 
   async chooseDate() {
-    console.log("Choosing date");
+    logger.info("Choosing date");
     const playDateSelector = "#ctl00_bodyContentPlaceHolder_ddlistPlayDate";
     await this.page.waitForSelector(playDateSelector);
     const playDateSelectElem = await this.page.$(playDateSelector);
     const dateOptions = await playDateSelectElem.$$eval("*", nodes =>
       nodes.map(n => ({ text: n.innerText, value: n.value }))
     );
-    console.log("Available play dates:");
-    console.log(JSON.stringify(dateOptions, null, " "));
+    logger.info("Available play dates:");
+    logger.info(JSON.stringify(dateOptions, null, " "));
 
     const nextTuesOpt = dateOptions.find(value =>
       this.isNextTuesday(value.text)
     );
-    console.log(`Selecting ${JSON.stringify(nextTuesOpt)}`);
+    logger.info(`Selecting ${JSON.stringify(nextTuesOpt)}`);
 
     await this.page.select(
       "#ctl00_bodyContentPlaceHolder_ddlistPlayDate",
       nextTuesOpt.value
     );
     await this.page.waitForResponse(register2Url);
-    console.log(`Selected ${nextTuesOpt.text}`);
+    logger.info(`Selected ${nextTuesOpt.text}`);
   }
 
   async choosePartner(partner) {
     if (!partner) {
-      console.log("No partner specified, registering self.");
+      logger.info("No partner specified, registering self.");
       return;
     }
 
-    console.log(`Choosing ${partner} as partner`);
+    logger.info(`Choosing ${partner} as partner`);
     await this.page.select(
       "#ctl00_bodyContentPlaceHolder_listUnselected",
       partner
     );
     await this.page.waitForResponse(register2Url);
 
-    console.log(`Selected ${partner} as partner`);
+    logger.info(`Selected ${partner} as partner`);
   }
 
   async submitRegistration() {
-    console.log("Attempt registration");
+    logger.info("Attempt registration");
     const registerButtonSelector = "#ctl00_bodyContentPlaceHolder_registerTB";
 
     await this.page.waitForSelector(registerButtonSelector);
 
-    console.log("Detecting register button");
+    logger.info("Detecting register button");
     const regBtn = await this.page.$(registerButtonSelector);
     const isDisabled = await this.page.$eval(
       registerButtonSelector,
@@ -107,11 +115,11 @@ export class AutomaticRegister {
     );
 
     if (isDisabled) {
-      console.log("The register button is disabled. Exiting.");
-      process.exit(0);
+      logger.info("The register button is disabled. Exiting.");
+      this.finished = true;
     }
 
-    console.log("Clicking the register button");
+    logger.info("Clicking the register button");
 
     await regBtn.click();
     await this.page.waitForResponse(register2Url);
