@@ -8,13 +8,16 @@ const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
 const tom = "tom nguyen 141";
 
 let logger = {};
-export class AutomaticRegister {
+export class Worker {
   constructor(index) {
     this.browser = {};
     this.page = {};
     this.index = index;
     this.finished = false;
     logger = getLogger(`Worker ${index}`);
+  }
+  isFinished() {
+    return this.finished;
   }
 
   async register() {

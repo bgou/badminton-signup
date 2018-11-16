@@ -1,4 +1,4 @@
-import { AutomaticRegister } from "./app";
+import { Worker } from "./app";
 import getLogger from "./logger";
 
 const logger = getLogger("App");
@@ -10,7 +10,7 @@ setInterval(() => {
   logger.info("Starting registration");
   if (workers.length < MAX_WORKERS) {
     logger.info("Starting worker");
-    const inst = new AutomaticRegister(workers.length);
+    const inst = new Worker(workers.length);
     inst.register();
     workers.push(inst);
   } else {
@@ -23,7 +23,7 @@ setInterval(() => {
         logger.info(
           `Worker ${index} is finished. Replacing with a new worker.`
         );
-        const inst = new AutomaticRegister(index);
+        const inst = new Worker(index);
         inst.register();
         workers[index] = inst;
       }
