@@ -64,6 +64,10 @@ const runApp = () => {
   }
 };
 
+// start right away
+runApp();
+
+// then run every 5 seconds
 setInterval(() => {
   runApp();
 }, 5000);
