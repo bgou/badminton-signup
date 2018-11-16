@@ -10,12 +10,14 @@ const workers = [];
 
 const shouldRun = () => {
   const now = moment.tz("America/Los_Angeles");
-  const startTime = moment()
+  const startTime = moment
+    .tz("America/Los_Angeles")
     .day(2)
     .hour(16)
     .minute(58)
     .second(0);
-  const endTime = moment()
+  const endTime = moment
+    .tz("America/Los_Angeles")
     .day(2)
     .hour(17)
     .minute(5)
