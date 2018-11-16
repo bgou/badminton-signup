@@ -15,6 +15,11 @@
       "^.+\\.jsx?$": "babel-jest"
     }
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
   "dependencies": {
     "moment": "^2.22.2",
     "puppeteer": "^1.9.0"
@@ -26,7 +31,10 @@
     "@babel/preset-env": "^7.1.0",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
+    "husky": "^1.1.4",
     "jest": "^23.6.0",
+    "prettier": "^1.15.2",
+    "pretty-quick": "^1.8.0",
     "webpack": "^4.23.1"
   }
 }

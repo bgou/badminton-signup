@@ -3,7 +3,7 @@ import moment from "moment";
 
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
-const tom = 'tom nguyen 141'
+const tom = "tom nguyen 141";
 
 export class AutomaticRegister {
   constructor() {
@@ -54,7 +54,7 @@ export class AutomaticRegister {
   }
 
   async chooseDate() {
-    console.log('Choosing date');
+    console.log("Choosing date");
     const playDateSelector = "#ctl00_bodyContentPlaceHolder_ddlistPlayDate";
     await this.page.waitForSelector(playDateSelector);
     const playDateSelectElem = await this.page.$(playDateSelector);
@@ -73,28 +73,24 @@ export class AutomaticRegister {
       "#ctl00_bodyContentPlaceHolder_ddlistPlayDate",
       nextTuesOpt.value
     );
-    await this.page.waitForResponse(
-      register2Url
-    );
-    console.log(`Selected ${nextTuesOpt.text}`)
+    await this.page.waitForResponse(register2Url);
+    console.log(`Selected ${nextTuesOpt.text}`);
   }
 
   async choosePartner(partner) {
     if (!partner) {
-      console.log('No partner specified, registering self.');
+      console.log("No partner specified, registering self.");
       return;
     }
-    
+
     console.log(`Choosing ${partner} as partner`);
     await this.page.select(
       "#ctl00_bodyContentPlaceHolder_listUnselected",
       partner
     );
-    await this.page.waitForResponse(
-      register2Url
-    );
+    await this.page.waitForResponse(register2Url);
 
-    console.log(`Selected ${partner} as partner`)
+    console.log(`Selected ${partner} as partner`);
   }
 
   async submitRegistration() {
@@ -102,22 +98,23 @@ export class AutomaticRegister {
     const registerButtonSelector = "#ctl00_bodyContentPlaceHolder_registerTB";
 
     await this.page.waitForSelector(registerButtonSelector);
-    
+
     console.log("Detecting register button");
     const regBtn = await this.page.$(registerButtonSelector);
-    const isDisabled = await this.page.$eval(registerButtonSelector, el => el.disabled);
+    const isDisabled = await this.page.$eval(
+      registerButtonSelector,
+      el => el.disabled
+    );
 
     if (isDisabled) {
-      console.log('The register button is disabled. Exiting.')
+      console.log("The register button is disabled. Exiting.");
       process.exit(0);
     }
 
-    console.log('Clicking the register button')
-    
-    await regBtn.click()
-    await this.page.waitForResponse(
-      register2Url
-    );
+    console.log("Clicking the register button");
+
+    await regBtn.click();
+    await this.page.waitForResponse(register2Url);
 
     await this.page.screenshot({ path: "example.png" });
     await this.browser.close();
