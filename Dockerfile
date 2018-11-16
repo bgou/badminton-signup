@@ -1,5 +1,7 @@
 FROM node:alpine
 
+RUN apk update && apk add yarn
+
 # Create app directory
 WORKDIR /usr/src/app
 
@@ -8,13 +10,11 @@ WORKDIR /usr/src/app
 # where available (npm@5+)
 COPY package*.json ./
 
-RUN npm install
-# If you are building your code for production
-# RUN npm install --only=production
+RUN yarn
 
 # Bundle app source
 COPY . .
 
 ENV LOG_LEVEL=info
 
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start" ]
