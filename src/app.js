@@ -98,9 +98,23 @@ export class AutomaticRegister {
   }
 
   async submitRegistration() {
-    console.log("Clicking the register button");
+    console.log("Attempt registration");
     const registerButtonSelector = "#ctl00_bodyContentPlaceHolder_registerTB";
-    await this.page.click(registerButtonSelector);
+
+    await this.page.waitForSelector(registerButtonSelector);
+    
+    console.log("Detecting register button");
+    const regBtn = await this.page.$(registerButtonSelector);
+    const isDisabled = await this.page.$eval(registerButtonSelector, el => el.disabled);
+
+    if (isDisabled) {
+      console.log('The register button is disabled. Exiting.')
+      process.exit(0);
+    }
+
+    console.log('Clicking the register button')
+    
+    await regBtn.click()
     await this.page.waitForResponse(
       register2Url
     );
