@@ -1,12 +1,42 @@
 import { Worker } from "./Worker";
 import getLogger from "./logger";
+import moment from "moment-timezone";
 
 const logger = getLogger("App");
 logger.info("Application starting");
 
 const MAX_WORKERS = 2;
 const workers = [];
-setInterval(() => {
+
+const shouldRun = () => {
+  const now = moment.tz("America/Los_Angeles");
+  const startTime = moment()
+    .day(2)
+    .hour(16)
+    .minute(58)
+    .second(0);
+  const endTime = moment()
+    .day(2)
+    .hour(17)
+    .minute(5)
+    .second(0);
+
+  logger.debug(`Start: ${startTime.format()}`);
+  logger.debug(`End: ${endTime.format()}`);
+
+  if (now.diff(startTime, "second") > 0 && now.diff(endTime, "second") < 0) {
+    return true;
+  }
+
+  logger.debug(`${now.format()} is not around Tuesday 5pm PST. Skipping`);
+  return false;
+};
+
+const runApp = () => {
+  if (!shouldRun()) {
+    return;
+  }
+
   logger.info("Starting registration");
   if (workers.length < MAX_WORKERS) {
     logger.info("Starting worker");
@@ -32,4 +62,8 @@ setInterval(() => {
       logger.info("All workers are in progress, no new worker replaced");
     }
   }
+};
+
+setInterval(() => {
+  runApp();
 }, 5000);

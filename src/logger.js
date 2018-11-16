@@ -9,7 +9,7 @@ const myFormat = printf(info => {
 
 export const getLogger = (lab = "Badminton") =>
   winston.createLogger({
-    level: "info",
+    level: process.env.LOG_LEVEL,
     format: combine(label({ label: lab }), timestamp(), myFormat),
     transports: [
       new winston.transports.Console(),
