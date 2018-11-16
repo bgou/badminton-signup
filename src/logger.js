@@ -1,19 +1,22 @@
 import winston from "winston";
 import { format } from "winston";
+import moment from "moment-timezone";
 
-const { combine, timestamp, label, printf } = format;
+const { combine, label, printf } = format;
 
 const myFormat = printf(info => {
-  return `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`;
+  return `${moment.tz("America/Los_Angeles").format()} [${info.label}] ${
+    info.level
+  }: ${info.message}`;
 });
 
 export const getLogger = (lab = "Badminton") =>
   winston.createLogger({
     level: process.env.LOG_LEVEL,
-    format: combine(label({ label: lab }), timestamp(), myFormat),
+    format: combine(label({ label: lab }), myFormat),
     transports: [
       new winston.transports.Console(),
-      new winston.transports.File({ filename: "application.log" })
+      new winston.transports.File({ filename: "log/application.log" })
     ]
   });
 

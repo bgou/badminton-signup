@@ -6,18 +6,19 @@ const logger = getLogger("App");
 logger.info("Application starting");
 
 const MAX_WORKERS = 2;
+const PST = "America/Los_Angeles";
 const workers = [];
 
 const shouldRun = () => {
-  const now = moment.tz("America/Los_Angeles");
+  const now = moment.tz(PST);
   const startTime = moment
-    .tz("America/Los_Angeles")
+    .tz(PST)
     .day(2)
     .hour(16)
     .minute(58)
     .second(0);
   const endTime = moment
-    .tz("America/Los_Angeles")
+    .tz(PST)
     .day(2)
     .hour(17)
     .minute(5)
