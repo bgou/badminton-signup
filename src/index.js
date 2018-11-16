@@ -1,10 +1,10 @@
-import { Worker } from "./app";
+import { Worker } from "./Worker";
 import getLogger from "./logger";
 
 const logger = getLogger("App");
 logger.info("Application starting");
 
-const MAX_WORKERS = 5;
+const MAX_WORKERS = 2;
 const workers = [];
 setInterval(() => {
   logger.info("Starting registration");
