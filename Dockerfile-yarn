@@ -12,11 +12,11 @@ RUN mkdir -p /usr/src/app/log
 COPY package*.json ./
 
 
-RUN npm install
+RUN yarn
 
 # Bundle app source
 COPY . .
 
 ENV LOG_LEVEL=info
 
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start" ]
