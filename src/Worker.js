@@ -26,12 +26,17 @@ export class Worker {
 
     try {
       await this.login();
-      await this.chooseDate();
-      await this.choosePartner(tom);
-      await this.submitRegistration();
+      const hasDate = await this.chooseDate();
+      if (hasDate) {
+        await this.choosePartner(tom);
+        await this.submitRegistration();
+      }
     } catch (ex) {
       console.error(ex);
     }
+
+    await this.page.screenshot({ path: "example.png" });
+    await this.browser.close();
     this.finished = true;
   }
 
@@ -78,6 +83,12 @@ export class Worker {
     const nextTuesOpt = dateOptions.find(value =>
       this.isNextTuesday(value.text)
     );
+
+    if (!nextTuesOpt) {
+      logger.info("No date available.");
+      return false;
+    }
+
     logger.info(`Selecting ${JSON.stringify(nextTuesOpt)}`);
 
     await this.page.select(
@@ -86,6 +97,7 @@ export class Worker {
     );
     await this.page.waitForResponse(register2Url);
     logger.info(`Selected ${nextTuesOpt.text}`);
+    return true;
   }
 
   async choosePartner(partner) {
@@ -120,15 +132,13 @@ export class Worker {
     if (isDisabled) {
       logger.info("The register button is disabled. Exiting.");
       this.finished = true;
+      return;
     }
 
     logger.info("Clicking the register button");
 
     await regBtn.click();
     await this.page.waitForResponse(register2Url);
-
-    await this.page.screenshot({ path: "example.png" });
-    await this.browser.close();
   }
 
   isNextTuesday(dateStr) {

@@ -15,7 +15,7 @@ const shouldRun = () => {
     .tz(PST)
     .day(2)
     .hour(16)
-    .minute(58)
+    .minute(55)
     .second(0);
   const endTime = moment
     .tz(PST)
