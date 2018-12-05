@@ -5,7 +5,7 @@ import moment from "moment-timezone";
 const logger = getLogger("App");
 logger.info("Application starting");
 
-const MAX_WORKERS = 2;
+const MAX_WORKERS = 10;
 const PST = "America/Los_Angeles";
 const workers = [];
 

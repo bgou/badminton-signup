@@ -1,7 +1,6 @@
 import puppeteer from "puppeteer";
 import moment from "moment";
 import getLogger from "./logger";
-import { worker } from "cluster";
 
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
