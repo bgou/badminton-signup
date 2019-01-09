@@ -36,7 +36,7 @@ const shouldRun = () => {
 };
 
 const runApp = () => {
-  if (!shouldRun()) {
+  if (!shouldRun() && process.env.NODE_ENV !== "development") {
     return;
   }
 
@@ -73,4 +73,4 @@ runApp();
 // then run every 5 seconds
 setInterval(() => {
   runApp();
-}, 5000);
+}, 2000);

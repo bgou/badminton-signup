@@ -1,7 +1,10 @@
 #!/bin/bash
 
 docker run -d \
+  --restart=always \
   --name badminton \
   -e LOG_LEVEL=debug \
-  -v $HOME/badminton-signup/log:/usr/src/app/log \
-  052852330140.dkr.ecr.us-west-2.amazonaws.com/badminton
+  -e NODE_ENV=production \
+  -v $HOME/badminton-signup/log:/app/log \
+  badminton
+  
