@@ -8,8 +8,9 @@ logger.info("Application starting");
 const MAX_WORKERS = 10;
 const PST = "America/Los_Angeles";
 const workers = [];
-
 const shouldRun = () => {
+  return true;
+
   const now = moment.tz(PST);
   const startTime = moment
     .tz(PST)
@@ -71,6 +72,6 @@ const runApp = () => {
 runApp();
 
 // then run every 5 seconds
-setInterval(() => {
-  runApp();
-}, 2000);
+// setInterval(() => {
+//   runApp();
+// }, 2000);

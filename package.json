@@ -1,11 +1,11 @@
 {
   "name": "badminton",
   "version": "1.0.0",
-  "main": "app.js",
   "author": "Bruce Gou (brucegou@gmail.com)",
   "license": "MIT",
   "private": true,
   "scripts": {
+    "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "babel-node src/index.js",
     "clean": "rm -rf dist"
@@ -21,22 +21,23 @@
     }
   },
   "dependencies": {
+    "@babel/runtime": "^7.5.5",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.23",
-    "puppeteer": "^1.9.0",
-    "winston": "^3.1.0"
+    "puppeteer": "^1.19.0",
+    "winston": "^3.2.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.1.2",
-    "@babel/core": "^7.1.2",
-    "@babel/node": "^7.0.0",
-    "@babel/preset-env": "^7.1.0",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^23.6.0",
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-loader": "^8.0.6",
     "husky": "^1.1.4",
-    "jest": "^23.6.0",
+    "jest": "^24.8.0",
     "prettier": "^1.15.2",
     "pretty-quick": "^1.8.0",
-    "webpack": "^4.23.1"
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6"
   }
 }

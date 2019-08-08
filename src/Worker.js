@@ -4,7 +4,11 @@ import getLogger from "./logger";
 
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
-const tom = "tom nguyen 141";
+
+const partners = {
+  tom: "tom nguyen 141",
+  pratyush: "Pratyush Bhatt 771"
+};
 
 let logger = {};
 export class Worker {
@@ -36,7 +40,7 @@ export class Worker {
       await this.login();
       const hasDate = await this.chooseDate();
       if (hasDate) {
-        await this.choosePartner(tom);
+        // await this.choosePartner(partners["pratyush"]);
         await this.submitRegistration();
       }
     } catch (ex) {
@@ -156,7 +160,7 @@ export class Worker {
     return (
       optDate.day() === 2 &&
       optDate.diff(today, "day") > 0 &&
-      optDate.hour() === 20
+      optDate.hour() === 18
     );
   }
 }
