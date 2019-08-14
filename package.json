@@ -5,9 +5,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "webpack",
+    "build": "babel src/*.js -d dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "babel-node src/index.js",
+    "start": "npm run build && node dist/index.js",
     "clean": "rm -rf dist"
   },
   "jest": {
@@ -25,11 +25,13 @@
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.23",
     "puppeteer": "^1.19.0",
-    "winston": "^3.2.0"
+    "winston": "^3.2.0",
+    "yargs": "^13.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
+    "@babel/node": "^7.5.5",
     "@babel/plugin-transform-runtime": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "babel-loader": "^8.0.6",

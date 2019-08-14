@@ -1,6 +1,7 @@
 import { Worker } from "./Worker";
 import getLogger from "./logger";
 import moment from "moment-timezone";
+import yargs from "yargs";
 
 const logger = getLogger("App");
 logger.info("Application starting");
@@ -8,8 +9,21 @@ logger.info("Application starting");
 const MAX_WORKERS = 10;
 const PST = "America/Los_Angeles";
 const workers = [];
+
+const argv = yargs
+  .option("force", {
+    alias: "f",
+    description: "Force run",
+    type: "boolean"
+  })
+  .help()
+  .alias("help", "h").argv;
+
 const shouldRun = () => {
-  return true;
+  if (argv.force) {
+    logger.info("--force is specified, ignoring schedule interval");
+    return true;
+  }
 
   const now = moment.tz(PST);
   const startTime = moment
@@ -32,46 +46,20 @@ const shouldRun = () => {
     return true;
   }
 
-  logger.debug(`${now.format()} is not around Tuesday 5pm PST. Skipping`);
+  logger.info(`${now.format()} is not around Tuesday 5pm PST. Skipping`);
   return false;
 };
 
-const runApp = () => {
-  if (!shouldRun() && process.env.NODE_ENV !== "development") {
-    return;
-  }
-
-  logger.info("Starting registration");
-  if (workers.length < MAX_WORKERS) {
-    logger.info("Starting worker");
-    const inst = new Worker(workers.length);
-    inst.register();
-    workers.push(inst);
-  } else {
-    logger.info(
-      `Max workers (${MAX_WORKERS}) reached. Checking if we can free some workers.`
-    );
-    const replacedWorker = false;
-    workers.forEach((worker, index) => {
-      if (worker.isFinished()) {
-        logger.info(
-          `Worker ${index} is finished. Replacing with a new worker.`
-        );
-        const inst = new Worker(index);
-        inst.register();
-        workers[index] = inst;
-      }
-    });
-    if (!replacedWorker) {
-      logger.info("All workers are in progress, no new worker replaced");
+const runApp = async () => {
+  while (true) {
+    if (!shouldRun() && process.env.NODE_ENV !== "development") {
+      return;
     }
+
+    const inst = new Worker(0);
+    await inst.register();
   }
 };
 
 // start right away
 runApp();
-
-// then run every 5 seconds
-// setInterval(() => {
-//   runApp();
-// }, 2000);

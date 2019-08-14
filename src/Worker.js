@@ -5,6 +5,7 @@ import getLogger from "./logger";
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
 
+const TIMEOUT = 3000;
 const partners = {
   tom: "tom nguyen 141",
   pratyush: "Pratyush Bhatt 771"
@@ -23,8 +24,15 @@ export class Worker {
     return this.finished;
   }
 
+  async waitForABit() {
+    await this.page.waitFor(TIMEOUT);
+  }
+
   async register() {
     this.browser = await puppeteer.launch({
+      headless: false,
+      // slowMo: 250,
+      devtools: true,
       args: [
         // Required for Docker version of Puppeteer
         "--no-sandbox",
@@ -35,20 +43,25 @@ export class Worker {
       ]
     });
     this.page = await this.browser.newPage();
+    this.page.setDefaultTimeout(TIMEOUT);
 
     try {
       await this.login();
       const hasDate = await this.chooseDate();
+
       if (hasDate) {
-        // await this.choosePartner(partners["pratyush"]);
+        await this.choosePartner(partners["pratyush"]);
         await this.submitRegistration();
+        logger.info("Saving screenshot to Result.png");
+        await this.page.screenshot({ path: "Result.png" });
+        process.exit(0);
       }
     } catch (ex) {
       console.error(ex);
+    } finally {
+      await this.browser.close();
     }
 
-    await this.page.screenshot({ path: "example.png" });
-    await this.browser.close();
     this.finished = true;
   }
 
@@ -61,10 +74,9 @@ export class Worker {
     await this.page.waitForSelector(leagueSelector);
     await this.page.click(leagueSelector);
 
-    const loginButtonSelector = "#ctl00_bodyContentPlaceHolder_LoginButton";
+    const loginButtonSelector =
+      "#ctl00_bodyContentPlaceHolder_Login1_LoginButton";
     await this.page.waitForSelector(loginButtonSelector);
-    await this.page.click(loginButtonSelector);
-    await this.page.waitForNavigation();
 
     logger.info("Entering crendentials");
     await this.page.type(
@@ -89,8 +101,7 @@ export class Worker {
     const dateOptions = await playDateSelectElem.$$eval("*", nodes =>
       nodes.map(n => ({ text: n.innerText, value: n.value }))
     );
-    logger.info("Available play dates:");
-    logger.info(JSON.stringify(dateOptions, null, " "));
+    logger.info(`Available play dates: ${JSON.stringify(dateOptions)}`);
 
     const nextTuesOpt = dateOptions.find(value =>
       this.isNextTuesday(value.text)
@@ -107,7 +118,8 @@ export class Worker {
       "#ctl00_bodyContentPlaceHolder_ddlistPlayDate",
       nextTuesOpt.value
     );
-    await this.page.waitForResponse(register2Url);
+
+    await this.waitForABit();
     logger.info(`Selected ${nextTuesOpt.text}`);
     return true;
   }
@@ -123,7 +135,7 @@ export class Worker {
       "#ctl00_bodyContentPlaceHolder_listUnselected",
       partner
     );
-    await this.page.waitForResponse(register2Url);
+    await this.waitForABit();
 
     logger.info(`Selected ${partner} as partner`);
   }
@@ -151,6 +163,7 @@ export class Worker {
 
     await regBtn.click();
     await this.page.waitForResponse(register2Url);
+    logger.info("Successfully clicked the register button");
   }
 
   isNextTuesday(dateStr) {
@@ -160,7 +173,7 @@ export class Worker {
     return (
       optDate.day() === 2 &&
       optDate.diff(today, "day") > 0 &&
-      optDate.hour() === 18
+      optDate.hour() === 20
     );
   }
 }
