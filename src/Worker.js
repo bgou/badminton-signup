@@ -5,7 +5,7 @@ import getLogger from "./logger";
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
 
-const TIMEOUT = 3000;
+const TIMEOUT = 5000;
 const partners = {
   tom: "tom nguyen 141",
   pratyush: "Pratyush Bhatt 771"
@@ -30,9 +30,9 @@ export class Worker {
 
   async register() {
     this.browser = await puppeteer.launch({
-      headless: false,
-      // slowMo: 250,
-      devtools: true,
+      headless: true,
+      // slowMo: 100,
+      // devtools: false,
       args: [
         // Required for Docker version of Puppeteer
         "--no-sandbox",
@@ -90,7 +90,7 @@ export class Worker {
 
     logger.info("Logging in");
     await this.page.click("#ctl00_bodyContentPlaceHolder_Login1_LoginButton");
-    await this.page.waitForNavigation();
+    await this.waitForABit();
   }
 
   async chooseDate() {
