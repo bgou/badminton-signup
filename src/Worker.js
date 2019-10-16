@@ -29,21 +29,30 @@ export class Worker {
   }
 
   async register() {
-    this.browser = await puppeteer.launch({
-      headless: true,
-      // slowMo: 100,
-      // devtools: false,
-      args: [
-        // Required for Docker version of Puppeteer
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        // This will write shared memory files into /tmp instead of /dev/shm,
-        // because Docker’s default for /dev/shm is 64MB
-        "--disable-dev-shm-usage"
-      ]
-    });
-    this.page = await this.browser.newPage();
-    this.page.setDefaultTimeout(TIMEOUT);
+    try {
+      this.browser = await puppeteer.launch({
+        headless: true,
+        // slowMo: 100,
+        // devtools: false,
+        args: [
+          // Required for Docker version of Puppeteer
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          // This will write shared memory files into /tmp instead of /dev/shm,
+          // because Docker’s default for /dev/shm is 64MB
+          "--disable-dev-shm-usage"
+        ]
+      });
+      this.page = await this.browser.newPage();
+      this.page.setDefaultTimeout(TIMEOUT);
+    } catch (ex) {
+      console.error(ex);
+      return;
+    } finally {
+      if (this.browser) {
+        await this.browser.close();
+      }
+    }
 
     try {
       await this.login();
