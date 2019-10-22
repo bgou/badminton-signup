@@ -47,11 +47,10 @@ export class Worker {
       this.page.setDefaultTimeout(TIMEOUT);
     } catch (ex) {
       console.error(ex);
-      return;
-    } finally {
       if (this.browser) {
         await this.browser.close();
       }
+      return;
     }
 
     try {
