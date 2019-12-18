@@ -6,10 +6,6 @@ export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
 
 const TIMEOUT = 5000;
-const partners = {
-  tom: "tom nguyen 141",
-  pratyush: "Pratyush Bhatt 771"
-};
 
 let logger = {};
 export class Worker {
@@ -20,6 +16,7 @@ export class Worker {
     this.finished = false;
     logger = getLogger(`Worker ${index}`);
   }
+
   isFinished() {
     return this.finished;
   }
@@ -28,12 +25,12 @@ export class Worker {
     await this.page.waitFor(TIMEOUT);
   }
 
-  async register() {
+  async register(partner) {
     try {
       this.browser = await puppeteer.launch({
-        headless: true,
+        // headless: false,
         // slowMo: 100,
-        // devtools: false,
+        // devtools: true,
         args: [
           // Required for Docker version of Puppeteer
           "--no-sandbox",
@@ -58,7 +55,10 @@ export class Worker {
       const hasDate = await this.chooseDate();
 
       if (hasDate) {
-        await this.choosePartner(partners["pratyush"]);
+        await this.choosePartner(partner);
+        await this.page.evaluate(() => {
+          debugger;
+        });
         await this.submitRegistration();
         logger.info("Saving screenshot to Result.png");
         await this.page.screenshot({ path: "Result.png" });
@@ -138,13 +138,32 @@ export class Worker {
       return;
     }
 
-    logger.info(`Choosing ${partner} as partner`);
-    await this.page.select(
-      "#ctl00_bodyContentPlaceHolder_listUnselected",
-      partner
-    );
-    await this.waitForABit();
+    logger.info(`Attempting to choose ${partner} as partner`);
 
+    const selector = "#ctl00_bodyContentPlaceHolder_listUnselected";
+
+    let partner_selector = "";
+    const options = await this.getSelectOptions(`${selector} > option`);
+
+    for (let i = 0; i < options.length; ++i) {
+      const item = options[i];
+      if (item.value.toLowerCase().includes(partner.toLowerCase())) {
+        partner_selector = item.value;
+        break;
+      }
+    }
+
+    if (!partner_selector) {
+      logger.error(
+        `Unable to find partner ${partner_selector}, registering self.`
+      );
+      return;
+    }
+
+    logger.info(`Selecting partner ${partner_selector}`);
+    await this.page.select(selector, partner_selector);
+
+    await this.waitForABit();
     logger.info(`Selected ${partner} as partner`);
   }
 
@@ -172,6 +191,23 @@ export class Worker {
     await regBtn.click();
     await this.page.waitForResponse(register2Url);
     logger.info("Successfully clicked the register button");
+  }
+
+  async getSelectOptions(selector) {
+    logger.info(`selecting ${selector}`);
+    const options = await this.page.evaluate(optionSelector => {
+      console.log(`optionSelector ${optionSelector}`);
+      return Array.from(document.querySelectorAll(optionSelector))
+        .filter(o => o.value)
+        .map(o => {
+          return {
+            name: o.text,
+            value: o.value
+          };
+        });
+    }, selector);
+
+    return options;
   }
 
   isNextTuesday(dateStr) {

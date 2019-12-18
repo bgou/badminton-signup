@@ -16,6 +16,11 @@ const argv = yargs
     description: "Force run",
     type: "boolean"
   })
+  .option("partner", {
+    alias: "p",
+    description: "Partner name or id",
+    type: "string"
+  })
   .help()
   .alias("help", "h").argv;
 
@@ -57,7 +62,7 @@ const runApp = async () => {
     }
 
     const inst = new Worker(0);
-    await inst.register();
+    await inst.register(argv.partner);
   }
 };
 
