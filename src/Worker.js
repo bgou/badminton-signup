@@ -4,6 +4,8 @@ import getLogger from "./logger";
 
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
+const USERNAME = process.env["USERNAME"];
+const PASSWORD = process.env["PASSWORD"];
 
 const TIMEOUT = 5000;
 
@@ -89,11 +91,11 @@ export class Worker {
     logger.info("Entering crendentials");
     await this.page.type(
       "#ctl00_bodyContentPlaceHolder_Login1_UserName",
-      "geekhuh"
+      USERNAME
     );
     await this.page.type(
       "#ctl00_bodyContentPlaceHolder_Login1_Password",
-      "$badminton"
+      PASSWORD
     );
 
     logger.info("Logging in");
