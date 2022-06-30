@@ -4,10 +4,10 @@ import getLogger from "./logger";
 
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
-const USERNAME = process.env["USERNAME"];
-const PASSWORD = process.env["PASSWORD"];
+const USERNAME = process.env["SBC_USERNAME"];
+const PASSWORD = process.env["SBC_PASSWORD"];
 
-const TIMEOUT = 5000;
+const TIMEOUT = 10000;
 
 let logger = {};
 export class Worker {
@@ -58,9 +58,6 @@ export class Worker {
 
       if (hasDate) {
         await this.choosePartner(partner);
-        await this.page.evaluate(() => {
-          debugger;
-        });
         await this.submitRegistration();
         logger.info("Saving screenshot to Result.png");
         await this.page.screenshot({ path: "Result.png" });
@@ -106,7 +103,6 @@ export class Worker {
   async chooseDate() {
     logger.info("Choosing date");
     const playDateSelector = "#ctl00_bodyContentPlaceHolder_ddlistPlayDate";
-    await this.page.waitForSelector(playDateSelector);
     const playDateSelectElem = await this.page.$(playDateSelector);
     const dateOptions = await playDateSelectElem.$$eval("*", nodes =>
       nodes.map(n => ({ text: n.innerText, value: n.value }))
