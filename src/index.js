@@ -62,7 +62,7 @@ const runApp = async () => {
     }
 
     const inst = new Worker(0);
-    await inst.register(argv.partner);
+    await inst.register();
   }
 };
 

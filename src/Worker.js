@@ -6,28 +6,14 @@ export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
 const USERNAME = process.env["SBC_USERNAME"];
 const PASSWORD = process.env["SBC_PASSWORD"];
+const PARTNER = process.env["SBC_PARTNER"] || "";
 
 const TIMEOUT = 10000;
 
 let logger = {};
 export class Worker {
   constructor(index) {
-    this.browser = {};
-    this.page = {};
-    this.index = index;
-    this.finished = false;
     logger = getLogger(`Worker ${index}`);
-  }
-
-  isFinished() {
-    return this.finished;
-  }
-
-  async waitForABit() {
-    await this.page.waitFor(TIMEOUT);
-  }
-
-  async register(partner) {
     try {
       this.browser = await puppeteer.launch({
         // headless: false,
@@ -42,22 +28,31 @@ export class Worker {
           "--disable-dev-shm-usage"
         ]
       });
+      this.page = {};
+      this.index = index;
+      this.finished = false;
+    } catch (error) {
+      
+    }
+  }
+
+  isFinished() {
+    return this.finished;
+  }
+
+  async waitForABit() {
+    await this.page.waitFor(TIMEOUT);
+  }
+
+  async register() {
+    try {
       this.page = await this.browser.newPage();
       this.page.setDefaultTimeout(TIMEOUT);
-    } catch (ex) {
-      console.error(ex);
-      if (this.browser) {
-        await this.browser.close();
-      }
-      return;
-    }
-
-    try {
       await this.login();
       const hasDate = await this.chooseDate();
 
       if (hasDate) {
-        await this.choosePartner(partner);
+        await this.choosePartner();
         await this.submitRegistration();
         logger.info("Saving screenshot to Result.png");
         await this.page.screenshot({ path: "Result.png" });
@@ -65,6 +60,9 @@ export class Worker {
       }
     } catch (ex) {
       console.error(ex);
+      if (this.page) {
+        this.page.close()
+      }
     } finally {
       await this.browser.close();
     }
@@ -130,13 +128,13 @@ export class Worker {
     return true;
   }
 
-  async choosePartner(partner) {
-    if (!partner) {
+  async choosePartner() {
+    if (!PARTNER) {
       logger.info("No partner specified, registering self.");
       return;
     }
 
-    logger.info(`Attempting to choose ${partner} as partner`);
+    logger.info(`Attempting to choose ${PARTNER} as partner`);
 
     const selector = "#ctl00_bodyContentPlaceHolder_listUnselected";
 
@@ -145,7 +143,7 @@ export class Worker {
 
     for (let i = 0; i < options.length; ++i) {
       const item = options[i];
-      if (item.value.toLowerCase().includes(partner.toLowerCase())) {
+      if (item.value.toLowerCase().includes(PARTNER.toLowerCase())) {
         partner_selector = item.value;
         break;
       }
@@ -162,7 +160,7 @@ export class Worker {
     await this.page.select(selector, partner_selector);
 
     await this.waitForABit();
-    logger.info(`Selected ${partner} as partner`);
+    logger.info(`Selected ${PARTNER} as partner`);
   }
 
   async submitRegistration() {
