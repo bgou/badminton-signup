@@ -4,10 +4,11 @@ import getLogger from "./logger";
 
 export const dateFormat = "MM/D/YYYY h:mm:ss a";
 const register2Url = "http://www.seattlebadmintonclub.com/Register2.aspx";
-const USERNAME = process.env["USERNAME"];
-const PASSWORD = process.env["PASSWORD"];
+const USERNAME = process.env["SBC_USERNAME"];
+const PASSWORD = process.env["SBC_PASSWORD"];
+const PARTNER = process.env["SBC_PARTNER"] || "";
 
-const TIMEOUT = 5000;
+const TIMEOUT = 10000;
 
 let logger = {};
 export class Worker {
@@ -48,19 +49,16 @@ export class Worker {
       console.error(ex);
       if (this.browser) {
         await this.browser.close();
-      }
-      return;
     }
+      return;
+  }
 
     try {
       await this.login();
       const hasDate = await this.chooseDate();
 
       if (hasDate) {
-        await this.choosePartner(partner);
-        await this.page.evaluate(() => {
-          debugger;
-        });
+        await this.choosePartner();
         await this.submitRegistration();
         logger.info("Saving screenshot to Result.png");
         await this.page.screenshot({ path: "Result.png" });
@@ -68,6 +66,9 @@ export class Worker {
       }
     } catch (ex) {
       console.error(ex);
+      if (this.page) {
+        this.page.close()
+      }
     } finally {
       await this.browser.close();
     }
@@ -106,7 +107,6 @@ export class Worker {
   async chooseDate() {
     logger.info("Choosing date");
     const playDateSelector = "#ctl00_bodyContentPlaceHolder_ddlistPlayDate";
-    await this.page.waitForSelector(playDateSelector);
     const playDateSelectElem = await this.page.$(playDateSelector);
     const dateOptions = await playDateSelectElem.$$eval("*", nodes =>
       nodes.map(n => ({ text: n.innerText, value: n.value }))
@@ -134,13 +134,13 @@ export class Worker {
     return true;
   }
 
-  async choosePartner(partner) {
-    if (!partner) {
+  async choosePartner() {
+    if (!PARTNER) {
       logger.info("No partner specified, registering self.");
       return;
     }
 
-    logger.info(`Attempting to choose ${partner} as partner`);
+    logger.info(`Attempting to choose ${PARTNER} as partner`);
 
     const selector = "#ctl00_bodyContentPlaceHolder_listUnselected";
 
@@ -149,7 +149,7 @@ export class Worker {
 
     for (let i = 0; i < options.length; ++i) {
       const item = options[i];
-      if (item.value.toLowerCase().includes(partner.toLowerCase())) {
+      if (item.value.toLowerCase().includes(PARTNER.toLowerCase())) {
         partner_selector = item.value;
         break;
       }
@@ -166,7 +166,7 @@ export class Worker {
     await this.page.select(selector, partner_selector);
 
     await this.waitForABit();
-    logger.info(`Selected ${partner} as partner`);
+    logger.info(`Selected ${PARTNER} as partner`);
   }
 
   async submitRegistration() {

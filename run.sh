@@ -5,8 +5,8 @@ docker run \
   --name badminton \
   -e LOG_LEVEL=debug \
   -e NODE_ENV=production \
-  -e USERNAME=${USERNAME} \
-  -e PASSWORD=${PASSWORD} \
+  -e SBC_USERNAME="${SBC_USERNAME}" \
+  -e SBC_PASSWORD="${SBC_PASSWORD}" \
+  -e SBC_PARTNER="${SBC_PARTNER}" \
   -v $HOME/repos/badminton-signup/log:/app/log \
   badminton:latest -f
-  
