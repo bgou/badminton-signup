@@ -56,13 +56,15 @@ const shouldRun = () => {
 };
 
 const runApp = async () => {
+  const worker = new Worker(0);
+  await worker.init();
+
   while (true) {
     if (!shouldRun() && process.env.NODE_ENV !== "development") {
       return;
     }
 
-    const inst = new Worker(0);
-    await inst.register();
+    await worker.register();
   }
 };
 

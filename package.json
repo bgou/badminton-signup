@@ -15,12 +15,11 @@
       "^.+\\.jsx?$": "babel-jest"
     }
   },
-
   "dependencies": {
     "@babel/runtime": "^7.17.9",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.34",
-    "puppeteer": "^1.20.0",
+    "puppeteer": "^16.1.0",
     "winston": "^3.7.2",
     "yargs": "^13.3.2"
   },
@@ -31,11 +30,11 @@
     "@babel/plugin-transform-runtime": "^7.17.0",
     "@babel/preset-env": "^7.16.11",
     "babel-loader": "^8.2.5",
+    "babel-node": "^0.0.1-security",
     "husky": "^1.3.1",
     "jest": "^28.0.0",
     "prettier": "^1.19.1",
     "pretty-quick": "^1.11.1",
-    "webpack": "^5.73.0",
-    "webpack-cli": "^3.3.12"
+    "webpack": "^5.73.0"
   }
 }

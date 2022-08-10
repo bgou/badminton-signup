@@ -5,6 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Program",
+      "program": "${workspaceFolder}/dist/index.js",
+      "runtimeVersion": "18.7.0",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    },
+    {
       "type": "node",
       "name": "jest-tests",
       "request": "launch",
@@ -18,7 +28,8 @@
       "type": "node",
       "request": "launch",
       "name": "Launch app.js",
-      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/babel-node",
+      "runtimeVersion": "18.7.0",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
       "program": "${workspaceFolder}/src/index.js",
       "args": ["-f"],
       "env": {

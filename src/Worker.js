@@ -8,7 +8,7 @@ const USERNAME = process.env["SBC_USERNAME"];
 const PASSWORD = process.env["SBC_PASSWORD"];
 const PARTNER = process.env["SBC_PARTNER"] || "";
 
-const TIMEOUT = 10000;
+const TIMEOUT = 5000;
 
 let logger = {};
 export class Worker {
@@ -20,20 +20,12 @@ export class Worker {
     logger = getLogger(`Worker ${index}`);
   }
 
-  isFinished() {
-    return this.finished;
-  }
-
-  async waitForABit() {
-    await this.page.waitFor(TIMEOUT);
-  }
-
-  async register(partner) {
+  async init() {
     try {
       this.browser = await puppeteer.launch({
-        // headless: false,
+        headless: false,
         // slowMo: 100,
-        // devtools: true,
+        devtools: true,
         args: [
           // Required for Docker version of Puppeteer
           "--no-sandbox",
@@ -43,17 +35,28 @@ export class Worker {
           "--disable-dev-shm-usage"
         ]
       });
-      this.page = await this.browser.newPage();
-      this.page.setDefaultTimeout(TIMEOUT);
+    logger.debug("Browser launched");
+
     } catch (ex) {
-      console.error(ex);
-      if (this.browser) {
-        await this.browser.close();
+      logger.error("Unable to launch browser via puppeteer");
+      logger.error(ex);
+      process.exit(1);
     }
-      return;
   }
 
+  isFinished() {
+    return this.finished;
+  }
+
+  async waitForABit() {
+    await this.page.waitForTimeout(TIMEOUT);
+  }
+
+  async register() {
     try {
+      this.page = await this.browser.newPage();
+      this.page.setDefaultTimeout(TIMEOUT);
+
       await this.login();
       const hasDate = await this.chooseDate();
 
@@ -62,18 +65,16 @@ export class Worker {
         await this.submitRegistration();
         logger.info("Saving screenshot to Result.png");
         await this.page.screenshot({ path: "Result.png" });
+        this.finished = true;
         process.exit(0);
       }
     } catch (ex) {
       console.error(ex);
+    } finally {
       if (this.page) {
         this.page.close()
       }
-    } finally {
-      await this.browser.close();
     }
-
-    this.finished = true;
   }
 
   async login() {
@@ -85,23 +86,28 @@ export class Worker {
     await this.page.waitForSelector(leagueSelector);
     await this.page.click(leagueSelector);
 
-    const loginButtonSelector =
-      "#ctl00_bodyContentPlaceHolder_Login1_LoginButton";
-    await this.page.waitForSelector(loginButtonSelector);
+    try {
+      const loginButtonSelector = "#ctl00_bodyContentPlaceHolder_Login1_LoginButton";
+      await this.page.waitForSelector(loginButtonSelector);
+      
+      logger.info("Entering crendentials");
+      await this.page.type(
+        "#ctl00_bodyContentPlaceHolder_Login1_UserName",
+        USERNAME
+      );
+      await this.page.type(
+        "#ctl00_bodyContentPlaceHolder_Login1_Password",
+        PASSWORD
+      );
 
-    logger.info("Entering crendentials");
-    await this.page.type(
-      "#ctl00_bodyContentPlaceHolder_Login1_UserName",
-      USERNAME
-    );
-    await this.page.type(
-      "#ctl00_bodyContentPlaceHolder_Login1_Password",
-      PASSWORD
-    );
-
-    logger.info("Logging in");
-    await this.page.click("#ctl00_bodyContentPlaceHolder_Login1_LoginButton");
-    await this.waitForABit();
+      logger.info("Logging in");
+      await this.page.click(loginButtonSelector);
+      await this.waitForABit();
+    } catch (err) {
+      logger.info("Choosing league");
+      await this.page.click("#ctl00_bodyContentPlaceHolder_LoginButton");
+      await this.waitForABit();
+    }
   }
 
   async chooseDate() {
